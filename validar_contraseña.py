@@ -1,51 +1,79 @@
-#Crear la función que valida la contraseña
-def validar_contraseña(contraseña:str):
-    #Crear lista de dígitos permitidos
-    simbolos_especiales = "@#$% "
+def validate_password(password: str) -> bool:
+    """
+    Validates whether a password meets the established security criteria.
 
+    Criteria:
+    - At least 8 characters in length.
+    - At least one uppercase letter.
+    - At least one lowercase letter.
+    - At least one number.
+    - At least one special symbol (@, #, $, %).
+    - Does not contain disallowed symbols.
 
-    if len(contraseña) < 8: #Validar el largo de la contraseña
-        raise ValueError("La contraseña no cumple con los criterios establecidos.")
+    Args:
+        password (str): The password to validate.
 
-    #Declarar varialbes que validan si se cumple el críterio o no
-    mayusculas = False
-    minusculas = False
-    numero = False
-    simbolo = False
+    Returns:
+        bool: True if the password is secure.
 
-    #Validar cada simbolo en contraseña
-    for letra in contraseña:
-        if letra.islower(): #Validar si tiene minusculas
-            minusculas = True
-        if letra.isupper():#Validar si tiene mayusculas
-            mayusculas = True
-        if letra.isdigit(): #Validar si tiene números
-            numero = True
-    if not contraseña.isalnum(): # Validar si tiene dígitos
-        simbolo = True
+    Raises:
+        ValueError: If the password does not meet any of the criteria.
+    """
+    import string
 
-    #Validar si cumple con todos los críterios
-    cumple = [mayusculas,minusculas,numero,simbolo]
-    if False in cumple:
-        raise ValueError("La contraseña no cumple con los criterios establecidos.")
-        return ValueError
-    else:
-        return True
+    # Define allowed special symbols (excluding space)
+    special_symbols = "@#$%"
 
+    # Define all symbols that can appear in the password
+    total_symbols = set(string.punctuation)
 
+    # Symbols that are not allowed
+    disallowed_symbols = total_symbols - set(special_symbols)
 
-"""Examples"""
-contraseña = "contraseña1@"
+    # Check for minimum length
+    if len(password) < 8:
+        raise ValueError("The password must have at least 8 characters.")
 
-try:
-    if validar_contraseña(contraseña):
-        print("¡La contraseña es segura!")
-except ValueError as error:
-    print(error)
+    # Initialize flags for each criterion
+    has_uppercase = False
+    has_lowercase = False
+    has_number = False
+    has_symbol = False
 
-contraseña = "#S53uJQysbyz(wpT"
-try:
-    if validar_contraseña(contraseña):
-        print("¡La contraseña es segura!")
-except ValueError as error:
-    print(error)
+    # Validate each character in the password
+    for character in password:
+        if character.islower():
+            has_lowercase = True
+        elif character.isupper():
+            has_uppercase = True
+        elif character.isdigit():
+            has_number = True
+        elif character in special_symbols:
+            has_symbol = True
+        elif character in disallowed_symbols:
+            raise ValueError(f"The password contains a disallowed symbol: '{character}'.")
+
+    # Check if all criteria are met
+    meets_criteria = [has_uppercase, has_lowercase, has_number, has_symbol]
+    if not all(meets_criteria):
+        # Identify which criterion is not met to provide a specific message
+        if not has_uppercase:
+            raise ValueError("The password must contain at least one uppercase letter.")
+        if not has_lowercase:
+            raise ValueError("The password must contain at least one lowercase letter.")
+        if not has_number:
+            raise ValueError("The password must contain at least one number.")
+        if not has_symbol:
+            raise ValueError("The password must contain at least one special symbol (@, #, $, %).")
+
+    return True
+
+# Examples
+passwords = ["password1@", "#S53uJQysbyz(wpT", "Example123", "Abc@123", "Valid#Pass1", "BadPass!"]
+
+for pwd in passwords:
+    try:
+        if validate_password(pwd):
+            print(f"The password '{pwd}' is secure!")
+    except ValueError as error:
+        print(f"Password '{pwd}': {error}")
